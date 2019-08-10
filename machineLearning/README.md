@@ -5,12 +5,28 @@ You are a die hard Lego enthusiast wishing to collect as many board sets as you 
 
 About the Dataset:
 The dataset has details of 12261 lego sets with the following 10 features
-!!![container width="100%" align="center"]
-![DataSetSnap](undefined/account/b16/6a1f0c95-2915-474c-917f-dc711cc8d89b/b-183/746fdbba-1756-47e9-b627-c5f95109851b/file.png)
-!!![container-end]
 
 
+Feature	Description
+age: 	Which age categories it belongs to
 
+list_price: 	price of the set (in $)
+
+num_reviews: 	number of reviews per set
+
+piece_count:	number of pieces in that lego set
+
+playstarrating:	ratings
+
+review_difficulty:	difficulty level of the set
+
+star_rating:	ratings
+
+theme_name:	which theme it belongs
+
+valstarrating:	ratings
+
+country:	country name
 
 ### Learnings from the project
 
