@@ -2,11 +2,20 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 #path - Path of file 
-df = pd.read_csv(path)
+
 # Code starts here
-X = df.drop(['customerID','Churn'], 1)
-y = df['Churn'].copy()
-X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+#Reading of file
+df = pd.read_csv(path)
+
+#Extracting features
+X = df.drop(['Churn','customerID'],1)
+
+#Extracting target class
+y = df['Churn']
+
+#Splitting data into train and test
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.3, random_state = 0)
 
 
 
@@ -16,41 +25,43 @@ from sklearn.preprocessing import LabelEncoder
 
 # Code starts here
 
-X_train['TotalCharges'] =X_train['TotalCharges'].replace(r'\s+', np.nan, regex=True)
-X_test['TotalCharges'] =X_test['TotalCharges'].replace(r'\s+', np.nan, regex=True)
+#Replacing spaces with 'NaN' in train dataset
+X_train['TotalCharges'].replace(' ',np.NaN, inplace=True)
 
-X_train['TotalCharges']  = X_train['TotalCharges'].astype(float)
-X_test['TotalCharges']  = X_test['TotalCharges'].astype(float)
+#Replacing spaces with 'NaN' in test dataset
+X_test['TotalCharges'].replace(' ',np.NaN, inplace=True)
 
+#Converting the type of column from X_train to float
+X_train['TotalCharges'] = X_train['TotalCharges'].astype(float)
 
+#Converting the type of column from X_test to float
+X_test['TotalCharges'] = X_test['TotalCharges'].astype(float)
 
-X_train['TotalCharges'] =X_train['TotalCharges'].fillna(np.mean)
-X_test['TotalCharges'] =X_test['TotalCharges'].fillna(np.mean)
+#Filling missing values
+X_train['TotalCharges'].fillna(X_train['TotalCharges'].mean(),inplace=True)
+X_test['TotalCharges'].fillna(X_train['TotalCharges'].mean(), inplace=True)
 
-
+#Check value counts
 print(X_train.isnull().sum())
 
-categorical_columns = X_train.select_dtypes(exclude=['number']).columns
+cat_cols = X_train.select_dtypes(include='O').columns.tolist()
 
-print(categorical_columns)
-categorical_columns = ['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines',
-       'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
-       'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract',
-       'PaperlessBilling', 'PaymentMethod']
+#Label encoding train data
+for x in cat_cols:
+    le = LabelEncoder()
+    X_train[x] = le.fit_transform(X_train[x])
 
-le = LabelEncoder()
-for cols in categorical_columns:
-    le.fit(X_train[cols])
-    le.fit(X_test[cols])
-    X_train[cols] = le.transform(X_train[cols])
-    X_test[cols] = le.transform(X_test[cols])
+#Label encoding test data    
+for x in cat_cols:
+    le = LabelEncoder()    
+    X_test[x] = le.fit_transform(X_test[x])
 
-# X_train[categorical_columns].apply(LabelEncoder().fit_transform)
-# X_test[categorical_columns].apply(LabelEncoder().fit_transform)
-
+#Encoding train data target    
 y_train = y_train.replace({'No':0, 'Yes':1})
+
+#Encoding test data target
 y_test = y_test.replace({'No':0, 'Yes':1})
-print(y_train.head())
+
 
 
 # --------------
@@ -58,20 +69,27 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
 
 # Code starts here
-print(X_train.head(2))
-print(X_test.head(2))
-print(y_train.head(2))
-print(y_test.head(2))
 
-ada_model= AdaBoostClassifier(random_state=0)
-ada_model.fit(X_train, y_train)
+# Initialising AdaBoostClassifier model
+ada_model = AdaBoostClassifier(random_state=0)
+
+#Fitting the model on train data
+ada_model.fit(X_train,y_train)
+
+#Making prediction on test data
 y_pred = ada_model.predict(X_test)
+
+#Finding the accuracy score
 ada_score = accuracy_score(y_test,y_pred)
-print(ada_score)
-ada_cm = confusion_matrix(y_test, y_pred)
-print(ada_cm)
-ada_cr = classification_report(y_test,y_pred)
-print(ada_cr)
+print("Accuracy: ",ada_score)
+
+#Finding the confusion matrix
+ada_cm=confusion_matrix(y_test,y_pred)
+print('Confusion matrix: \n', ada_cm)
+
+#Finding the classification report
+ada_cr=classification_report(y_test,y_pred)
+print('Classification report: \n', ada_cr)
 
 
 # --------------
@@ -83,27 +101,52 @@ parameters={'learning_rate':[0.1,0.15,0.2,0.25,0.3],
             'max_depth':range(1,3)}
 
 # Code starts here
+
+#Initializing the model
 xgb_model = XGBClassifier(random_state=0)
+
+#Fitting the model on train data
 xgb_model.fit(X_train,y_train)
-y_pred= xgb_model.predict(X_test)
 
+#Making prediction on test data
+y_pred = xgb_model.predict(X_test)
+
+#Finding the accuracy score
 xgb_score = accuracy_score(y_test,y_pred)
-print(xgb_score)
-xgb_cm = confusion_matrix(y_test, y_pred)
-print(xgb_cm)
-xgb_cr = classification_report(y_test,y_pred)
-print(xgb_cr)
+print("Accuracy: ",xgb_score)
+
+#Finding the confusion matrix
+xgb_cm=confusion_matrix(y_test,y_pred)
+print('Confusion matrix: \n', xgb_cm)
+
+#Finding the classification report
+xgb_cr=classification_report(y_test,y_pred)
+print('Classification report: \n', xgb_cr)
 
 
-clf_model = GridSearchCV(estimator=xgb_model, param_grid=parameters)
-clf_model.fit(X_train,y_train)
-y_pred= clf_model.predict(X_test)
+### GridSearch CV
 
+#Initialsing Grid Search
+clf = GridSearchCV(xgb_model, parameters)
+
+#Fitting the model on train data
+clf.fit(X_train,y_train)
+
+#Making prediction on test data
+y_pred = clf.predict(X_test)
+
+#Finding the accuracy score
 clf_score = accuracy_score(y_test,y_pred)
-print(clf_score)
-clf_cm = confusion_matrix(y_test, y_pred)
-print(clf_cm)
-clf_cr = classification_report(y_test,y_pred)
-print(clf_cr)
+print("Accuracy: ",clf_score)
+
+#Finding the confusion matrix
+clf_cm=confusion_matrix(y_test,y_pred)
+print('Confusion matrix: \n', clf_cm)
+
+#Finding the classification report
+clf_cr=classification_report(y_test,y_pred)
+print('Classification report: \n', clf_cr)
+
+#Code ends here
 
 
