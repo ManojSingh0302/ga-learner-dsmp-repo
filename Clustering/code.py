@@ -85,37 +85,36 @@ clusters.plot.scatter(x='x', y='y', c='cluster', colormap='viridis')
 # Code starts here
 
 # merge 'clusters' and 'transactions'
-data = pd.merge(clusters, transactions, on="Customer Last Name")
-#print(data.head())
+data = pd.merge(clusters, transactions)
+print(data.head())
+print('='*25)
+
+
 # merge `data` and `offers`
-#print("="*20)
-data = pd.merge(offers, data, on="Offer #")
-# print(data.head())
-# print("="*20)
+data = pd.merge(offers, data)
+print(data.head())
+print('='*25)
+
 # initialzie empty dictionary
 champagne = {}
 
 # iterate over every cluster
-for i in data['cluster'].unique():
+for val in data.cluster.unique():
     # observation falls in that cluster
-    new_df = data[data['cluster']==i]
-    #print("I am in for step 1 for new_df  ", new_df.head())
-    #print("="*20)
+    new_df = data[data.cluster == val]
     # sort cluster according to type of 'Varietal'
     counts = new_df['Varietal'].value_counts(ascending=False)
-    #print("I am in for step2 for counts ", counts)
-    #print("="*20)
     # check if 'Champagne' is ordered mostly
-    #print('counts.index[0]', counts.index[0])
-    if counts.index[0] == 'Champagne' :
+    if counts.index[0] == 'Champagne':
         # add it to 'champagne'
-        champagne[i] = counts[0]
-        
+        champagne[val] = (counts[0])
+
 # get cluster with maximum orders of 'Champagne' 
-cluster_champagne = max(champagne, key=lambda k: champagne[k])
+cluster_champagne = max(champagne, key=champagne.get)
 
 # print out cluster number
 print(cluster_champagne)
+#     print('='*50)
 
 
 
