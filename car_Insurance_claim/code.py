@@ -4,55 +4,84 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+import warnings
+warnings.filterwarnings('ignore')
 
-# Code starts here
+# Load the data
 df = pd.read_csv(path)
-print(df.head())
-print(df.info())
 
-df[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']] = df[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].replace('\$','',regex=True)
-df[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']] = df[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].replace('\,','',regex=True)
-print(df.head())
+# replace the $ symbol
+columns = ['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']
 
-X = df.drop(['CLAIM_FLAG'], 1).copy()
-y = df['CLAIM_FLAG'].copy()
+for col in columns:
+    df[col].replace({'\$': '', ',': ''}, regex=True,inplace=True)
 
-count = df['CLAIM_FLAG'].value_counts()
-print('value count of CLAIM_FLAG', count)
-X_train,X_test,y_train,y_test = train_test_split(X,y, test_size = 0.3, random_state = 6)
+# store independent variable
+X = df.drop(['CLAIM_FLAG'],axis=1)
 
+# store dependent variable
+y = df['CLAIM_FLAG']
 
+# Check the value counts
+count = y.value_counts()
 
-
+# spliting the dataset
+X_train,X_test,y_train,y_test=train_test_split(X,y ,test_size=0.3,random_state=6)
 # Code ends here
+
 
 
 # --------------
 # Code starts here
-X_train[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']] = X_train[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].astype(float)
+# Convert object type to float on X_train
+X_train[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']]=X_train[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].astype(float)
 
-X_test[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']] = X_test[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].astype(float)
+# Convert object type to float on X_test
+X_test[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']]=X_test[['INCOME','HOME_VAL','BLUEBOOK','OLDCLAIM','CLM_AMT']].astype(float)
 
-print(X_train.isnull().values.any())
-print(X_test.isnull().values.any())
+# check missing values in X_train
+print(pd.DataFrame({'total_missing': X_train.isnull().sum(), 'perc_missing': (X_train.isnull().sum()/7211)*100}))
+
+# check missing values in X_test
+print(pd.DataFrame({'total_missing': X_train.isnull().sum(), 'perc_missing': (X_train.isnull().sum()/3091)*100}))
 # Code ends here
+
+
 
 
 # --------------
 # Code starts h
-X_train = X_train.dropna(subset=['YOJ', 'OCCUPATION'])
-X_test = X_test.dropna(subset=['YOJ', 'OCCUPATION'])
 
-#Update the index of target
-y_train = y_train[X_train.index]
-y_test = y_test[X_test.index]
+# drop missing values
+X_train.dropna(subset=['YOJ','OCCUPATION'],inplace=True)
+X_test.dropna(subset=['YOJ','OCCUPATION'],inplace=True)
 
-#Fill the missing values for columns  
-X_train[['AGE','CAR_AGE','INCOME','HOME_VAL']].fillna(X_train[['AGE','CAR_AGE','INCOME','HOME_VAL']].mean(),inplace=True)
-X_test[['AGE','CAR_AGE','INCOME','HOME_VAL']].fillna(X_test[['AGE','CAR_AGE','INCOME','HOME_VAL']].mean(),inplace=True)
+
+y_train=y_train[X_train.index]
+y_test=y_test[X_test.index]
 
 
 
+# fill missing values with mean
+X_train['AGE'].fillna((X_train['AGE'].mean()), inplace=True)
+X_test['AGE'].fillna((X_train['AGE'].mean()), inplace=True)
+
+X_train['CAR_AGE'].fillna((X_train['CAR_AGE'].mean()), inplace=True)
+X_test['CAR_AGE'].fillna((X_train['CAR_AGE'].mean()), inplace=True)
+
+
+
+X_train['INCOME'].fillna((X_train['INCOME'].mean()), inplace=True)
+X_test['INCOME'].fillna((X_train['INCOME'].mean()), inplace=True)
+
+
+
+X_train['HOME_VAL'].fillna((X_train['HOME_VAL'].mean()), inplace=True)
+X_test['HOME_VAL'].fillna((X_train['HOME_VAL'].mean()), inplace=True)
+
+
+print(X_train.isnull().sum())
+print(X_test.isnull().sum())
 # Code ends here
 
 
@@ -61,10 +90,13 @@ from sklearn.preprocessing import LabelEncoder
 columns = ["PARENT1","MSTATUS","GENDER","EDUCATION","OCCUPATION","CAR_USE","CAR_TYPE","RED_CAR","REVOKED"]
 
 # Code starts here
+# Instantiate label encoder
 le = LabelEncoder()
 for col in columns:
     try:
+        # fit and transform label encoder on X_train
         X_train[col] = le.fit_transform(X_train[col].astype(str))
+        # transform label encoder on X_test
         X_test[col] = le.transform(X_test[col].astype(str))
     except:
         print('Error encoding '+ col)
@@ -77,19 +109,26 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 
+
+
 # code starts here 
-print(X_train.info())
-X_train.fillna(X_train[['AGE','CAR_AGE','INCOME','HOME_VAL']].mean(),inplace=True)
-X_test.fillna(X_test[['AGE','CAR_AGE','INCOME','HOME_VAL']].mean(),inplace=True)
-print(X_train.info())
-print(X_test.info())
-model = LogisticRegression(random_state=6)
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+
+# Instantiate logistic regression
+model = LogisticRegression(random_state = 6)
+
+# fit the model
+model.fit(X_train,y_train)
+
+# predict the result
+y_pred =model.predict(X_test)
+
+# calculate the f1 score
 score = accuracy_score(y_test, y_pred)
-print('Accuracy Score {}', score)
+print(score)
+
+# calculate the precision score
 precision = precision_score(y_test, y_pred)
-print('Precision Score {}', precision)
+print(precision)
 # Code ends here
 
 
@@ -98,24 +137,41 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE
 
 # code starts here
-#Instantiate a SMOTE
+
+# Instantiate SMOTE 
 smote = SMOTE(random_state=9)
+
+# fit smote on training set
 X_train, y_train = smote.fit_sample(X_train, y_train)
 
-#Instantiate a StandardScaler
+# code ends here
+
+# Instantiate a standardScaler
 scaler = StandardScaler()
-X_train= scaler.fit_transform(X_train)
-X_test= scaler.transform(X_test)
+
+# Fit on training set only.
+X_train = scaler.fit_transform(X_train)
+
+# Apply transform to the test set.
+X_test = scaler.transform(X_test)
+
 # Code ends here
 
 
 # --------------
 # Code Starts here
-model = LogisticRegression(random_state=6)
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+# Instantiate logistic regression
+model = LogisticRegression()
+
+# fit the model
+model.fit(X_train,y_train)
+
+# predict the result
+y_pred =model.predict(X_test)
+
+# calculate the accuracy_score 
 score = accuracy_score(y_test, y_pred)
-print('Accuracy Score {}', score)
+print(score)
 # Code ends here
 
 
