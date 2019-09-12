@@ -8,23 +8,23 @@ The snapshot of the data, you will be working upon:
 
 The dataset has details of 594 super hero characters with the following 17 features.
 
-**Feature	            Description**
+**Feature**	            **Description**
 ID	                    Unique character ID
-Name	           Name of the character
-Gender	           Male/Female
-Intelligence	   Intelligence points of the character
-Strength	       Strength points of the character
-Speed	           Speed points of the character
-Durability	       Durability points of the character
-Power	           Power points of the character
-Combat	           Combat points of the character
-Total	           Total sum of all the above points of the character
-Height	           Height of the character(-99 value equates to 'immeasurable')
-Weight	           Weight of the character(-99 value equates to 'immeasurable')
-SkinColor	       Skin color of the the character
-EyeColor	       Eye color of the character
-HairColor	       Hair color of the character
-Race	           Which race the character belongs to
+Name	                  Name of the character
+Gender	                Male/Female
+Intelligence	          Intelligence points of the character
+Strength	              Strength points of the character
+Speed	                 Speed points of the character
+Durability	            Durability points of the character
+Power	                 Power points of the character
+Combat	                Combat points of the character
+Total	                 Total sum of all the above points of the character
+Height	                Height of the character(-99 value equates to 'immeasurable')
+Weight	                Weight of the character(-99 value equates to 'immeasurable')
+SkinColor	             Skin color of the the character
+EyeColor	              Eye color of the character
+HairColor	             Hair color of the character
+Race	                  Which race the character belongs to
 
 
 
