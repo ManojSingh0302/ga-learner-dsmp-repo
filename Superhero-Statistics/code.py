@@ -6,75 +6,126 @@ import matplotlib.pyplot as plt
 
 
 #path of the data file- path
-data = pd.read_csv(path)
-#print (data.head())
-data['Gender'].replace('-', 'Agender',inplace=True)
-gender_count = data['Gender'].value_counts()
-
-#print ('gender_count', gender_count)
-gender_count.plot.bar() 
-plt.title('Bar Graph for Gender')
-plt.ylabel('Count of Gender')
 #Code starts here 
 
+#Reading of the file
+data=pd.read_csv(path)
 
+#Replacing '-'' in the column with 'Agender'
+data['Gender'].replace('-','Agender', inplace=True)
+
+#Storing the value counts of 'Gender'
+gender_count=data['Gender'].value_counts()
+
+#Plotting bar graph of 'gender_count'
+plt.bar(gender_count.index, gender_count)
+plt.show()
+
+#Code ends here
 
 
 # --------------
 #Code starts here
-alignment= data['Alignment'].value_counts()
+
+#Storing the value count of 'Alignment' 
+alignment = data['Alignment'].value_counts()
+
+#Setting the figure size
 plt.figure(figsize=(6,6))
-plt.pie(alignment, explode = (0.05,0.05,0.05))
-plt.title('Character Alignment')
+
+#Plotting pie chart for 'alignment'
+plt.pie(alignment,labels=alignment.index,explode=(0.05,0.05,0.05),autopct='%1.1f %%')
+            
+#Setting the pie chart title
+plt.title('Character alignment')
+
+#Code ends Header
 
 
 # --------------
 #Code starts here
-sc_df = data[['Strength','Combat']]
-print (sc_df.shape)
-#sc_df = data[:,['Strength','Combat','Intelligence']]
 
-sc_covariance = np.cov(sc_df.Strength, sc_df.Combat)
-sc_covariance= sc_covariance[0][1]
-print (sc_covariance)
-sc_strength = sc_df.Strength.std()
-sc_combat = sc_df.Combat.std()
-sc_pearson= sc_covariance/ (sc_strength * sc_combat)
-print('sc_pearson', sc_pearson)
+#Subsetting the data with columns ['Strength', 'Combat']
+sc_df = data[['Strength','Combat']].copy()
+
+#Finding covariance between 'Strength' and 'Combat'
+sc_covariance = sc_df.cov().iloc[0,1]
+
+#Finding the standard deviation of 'Strength'
+sc_strength = sc_df['Strength'].std()
+
+#Finding the standard deviation of 'Combat'
+sc_combat = sc_df['Combat'].std()
+
+#Calculating the Pearson's correlation between 'Strength' and 'Combat'
+sc_pearson = sc_covariance/(sc_combat*sc_strength)
+
+print("Pearson's Correlation Coefficient between Strength and Combat : ", sc_pearson)
 
 
-ic_df = data[['Intelligence','Combat']]
-print (ic_df.shape)
-ic_covariance = np.cov(ic_df.Intelligence, ic_df.Combat)
-ic_covariance= ic_covariance[0][1]
-ic_intelligence = ic_df.Intelligence.std()
-ic_combat = ic_df.Combat.std()
-ic_pearson= ic_covariance/ (ic_intelligence * ic_combat)
-print ('ic_pearson',ic_pearson)
+#Subsetting the data with columns ['Intelligence', 'Combat']
+ic_df = data[['Intelligence','Combat']].copy()
+
+#Finding covariance between 'Intelligence' and 'Combat'
+ic_covariance = ic_df.cov().iloc[0,1]
+
+#Finding the standard deviation of 'Intelligence'
+ic_intelligence = ic_df['Intelligence'].std()
+
+#Finding the standard deviation of 'Combat'
+ic_combat = ic_df['Combat'].std()
+
+#Calculating the Pearson's correlation between 'Intelligence' and 'Combat'
+ic_pearson = ic_covariance/(ic_intelligence*ic_combat)
+
+print("Pearson's Correlation Coefficient between Intelligence and Combat : ", ic_pearson)
+#Code ends here
 
 
 # --------------
 #Code starts here
-total_high = data.Total.quantile(0.99)
-print (total_high)
 
-super_best = data [ data.Total> total_high]
-print (super_best.head())
+#Find the quantile=0.99 value of 'Total' column
+total_high= data['Total'].quantile(q=0.99)
 
-super_best_names = super_best.Name.tolist()
-print (type(super_best_names))
-print (super_best_names)
+#Subsetting the dataframe based on 'total_high' 
+super_best=data[data['Total']>total_high]
+
+#Creating a list of 'Name' associated with the 'super_best' dataframe
+super_best_names=list(super_best['Name'])
+
+#Printing the names
+print(super_best_names)
+
+#Code ends here
 
 
-# --------------
+
 #Code starts here
-#fig, ax_1, ax_2, ax_3 = plt.subplots(nrows = 1 , ncols = 3, figsize=(15,15))
 
-ax_1 = data.Intelligence
-ax_2= data.Speed
-ax_3= data.Power
+#Setting up the subplots
+fig, (ax_1, ax_2,ax_3) = plt.subplots(1,3, figsize=(20,8))
+
+#Plotting box plot
+ax_1.boxplot(super_best['Intelligence'])
+
+#Setting the subplot axis title
+ax_1.set(title='Intelligence')
 
 
-plt.boxplot ([ax_1, ax_2, ax_3])
+#Plotting box plot
+ax_2.boxplot(super_best['Speed'])
+
+#Setting the subplot axis title
+ax_2.set(title='Speed')
+
+
+#Plotting box plot
+ax_3.boxplot(super_best['Power'])
+
+#Setting the subplot axis title
+ax_3.set(title='Power')
+
+#Code ends here   
 
 
